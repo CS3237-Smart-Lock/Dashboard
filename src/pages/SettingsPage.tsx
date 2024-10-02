@@ -1,3 +1,4 @@
+import { addUser } from "@/api/api";
 import { NewUserForm } from "@/components/NewUserForm";
 import { Button } from "@/components/ui/button";
 import { UserCard } from "@/components/UserCard";
@@ -10,6 +11,7 @@ type User = {
 };
 
 const SettingsPage = () => {
+  const [newUserFormOpen, setNewUserFormOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([
     { name: "Sam", description: "me", image_url: "https://placehold.co/200" },
     {
@@ -42,7 +44,14 @@ const SettingsPage = () => {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl">Settings</h1>
-      <NewUserForm trigger={<Button className="w-fit">Add new user</Button>} />
+      <NewUserForm
+        open={newUserFormOpen}
+        onOpenChange={setNewUserFormOpen}
+        onAddUser={addUser}
+      />
+      <Button className="w-fit" onClick={() => setNewUserFormOpen(true)}>
+        Add new user
+      </Button>
       <div className="flex gap-4 flex-wrap">
         {users.map((user) => (
           <UserCard
