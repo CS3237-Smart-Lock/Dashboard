@@ -1,4 +1,4 @@
-const api = process.env.API_URL;
+const api = process.env.API_URL || "http://127.0.0.1:5000";
 
 const deleteUser = async (id: number) => {
   const response = await fetch(`${api}/user/${id}`, {
