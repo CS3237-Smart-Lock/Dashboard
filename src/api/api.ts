@@ -1,5 +1,7 @@
-const deleteUser = async (name: string) => {
-  const response = await fetch(`/users/${name}`, {
+const api = process.env.API_URL;
+
+const deleteUser = async (id: number) => {
+  const response = await fetch(`${api}/user/${id}`, {
     method: "DELETE",
   });
 
@@ -12,9 +14,17 @@ export const addUser = async (name: string, desc: string, image: File) => {
   formData.append("desc", desc);
   formData.append("image", image);
 
-  const response = await fetch("/your-api-endpoint", {
+  const response = await fetch(`${api}/user`, {
     method: "POST",
     body: formData,
+  });
+
+  return response;
+};
+
+export const getAllUsers = async () => {
+  const response = await fetch(`${api}/users`, {
+    method: "get",
   });
 
   return response;
