@@ -12,6 +12,7 @@ import {
 type DeleteUserDialogProps = {
   open: boolean;
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>;
+  onDeleteUser: () => Promise<JSON>;
 };
 
 export function DeleteUserDialog(props: DeleteUserDialogProps) {
@@ -32,7 +33,15 @@ export function DeleteUserDialog(props: DeleteUserDialogProps) {
           <AlertDialogCancel onClick={() => props.onOpenChange(false)}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => {
+              props.onOpenChange(false);
+              props.onDeleteUser();
+              window.location.reload();
+            }}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

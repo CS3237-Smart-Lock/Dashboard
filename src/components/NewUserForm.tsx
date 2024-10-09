@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 type NewUserFormProps = {
   open: boolean;
   onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>;
-  onAddUser?: (name: string, desc: string, image: File) => Promise<Response>;
+  onAddUser?: (name: string, desc: string, image: File) => Promise<JSON>;
 };
 
 export const NewUserForm = (props: NewUserFormProps) => {
@@ -75,17 +75,13 @@ export const NewUserForm = (props: NewUserFormProps) => {
     }
 
     try {
-      const response = await props.onAddUser(name, description, image);
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error adding user:", errorData.message || errorData);
+      await props.onAddUser(name, description, image);
+      toast({
+        variant: "default",
+        description: "User successfully added",
+      });
 
-        toast({
-          variant: "destructive",
-          title: "Error adding user",
-          description: errorData.message || "An error occurred",
-        });
-      }
+      if (props.onOpenChange) props.onOpenChange(false);
     } catch (e) {
       const error = e as Error;
       console.error("Error during request:", error.message);
@@ -147,7 +143,7 @@ export const NewUserForm = (props: NewUserFormProps) => {
         </div>
         <DialogFooter>
           <Button type="submit" onClick={handleSubmit}>
-            Save changes
+            Create
           </Button>
         </DialogFooter>
       </DialogContent>

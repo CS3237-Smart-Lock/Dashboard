@@ -19,7 +19,8 @@ import { useState } from "react";
 type UserCardProps = {
   name: string;
   description: string;
-  image_url: string;
+  image_url?: string;
+  onDeleteUser: () => Promise<JSON>;
 };
 
 export const UserCard = (props: UserCardProps) => {
@@ -30,6 +31,7 @@ export const UserCard = (props: UserCardProps) => {
       <DeleteUserDialog
         open={deleteUserDialogOpen}
         onOpenChange={setDeleteUserDialogOpen}
+        onDeleteUser={props.onDeleteUser}
       />
       <Card className="hover:bg-muted transition-all">
         <CardHeader>
@@ -49,8 +51,11 @@ export const UserCard = (props: UserCardProps) => {
           </CardTitle>
           <CardDescription>{props.description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <img src={props.image_url} alt={props.name} />
+        <CardContent className="flex flex-col gap-4 w-52">
+          <img
+            src={`${import.meta.env.VITE_API_URL}${props.image_url}`}
+            alt={props.name}
+          />
         </CardContent>
       </Card>
     </>

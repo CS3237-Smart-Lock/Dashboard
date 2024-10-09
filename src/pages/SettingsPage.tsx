@@ -1,10 +1,13 @@
-import { addUser } from "@/api/api";
+import * as Api from "@/api/api";
 import { NewUserForm } from "@/components/NewUserForm";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { UserCard } from "@/components/UserCard";
-import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 type User = {
+  id: number;
   name: string;
   description: string;
   image_url: string;
@@ -12,34 +15,24 @@ type User = {
 
 const SettingsPage = () => {
   const [newUserFormOpen, setNewUserFormOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>([
-    { name: "Sam", description: "me", image_url: "https://placehold.co/200" },
-    {
-      name: "Dummy",
-      description: "Lorem Ipsum",
-      image_url: "https://placehold.co/200",
-    },
-    {
-      name: "Dummy",
-      description: "Lorem Ipsum",
-      image_url: "https://placehold.co/200",
-    },
-    {
-      name: "Dummy",
-      description: "Lorem Ipsum",
-      image_url: "https://placehold.co/200",
-    },
-    {
-      name: "Dummy",
-      description: "Lorem Ipsum",
-      image_url: "https://placehold.co/200",
-    },
-    {
-      name: "Dummy",
-      description: "Lorem Ipsum",
-      image_url: "https://placehold.co/200",
-    },
-  ]);
+  const [users, setUsers] = useState<User[] | undefined>();
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await Api.getAllUsers();
+        setUsers(usersData);
+      } catch (e) {
+        const error = e as Error;
+        toast({
+          variant: "destructive",
+          title: "Error fetching users:",
+          description: error.message,
+        });
+      }
+    };
+    fetchUsers();
+  }, [newUserFormOpen]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,19 +40,28 @@ const SettingsPage = () => {
       <NewUserForm
         open={newUserFormOpen}
         onOpenChange={setNewUserFormOpen}
-        onAddUser={addUser}
+        onAddUser={Api.addUser}
       />
       <Button className="w-fit" onClick={() => setNewUserFormOpen(true)}>
         Add new user
       </Button>
       <div className="flex gap-4 flex-wrap">
-        {users.map((user) => (
-          <UserCard
-            name={user.name}
-            description={user.description}
-            image_url={user.image_url}
-          />
-        ))}
+        {users
+          ? users.map((user) => (
+              <UserCard
+                name={user.name}
+                description={user.description}
+                image_url={user.image_url}
+                onDeleteUser={() => Api.deleteUser(user.id)}
+              />
+            ))
+          : Array.from({ length: 8 }).map(() => (
+              <div className="flex flex-col gap-4 p-4 border rounded-lg w-52">
+                <Skeleton className="rounded-md w-full h-6" />
+                <Skeleton className="rounded-md w-full h-6" />
+                <Skeleton className="h-32" />
+              </div>
+            ))}
       </div>
     </div>
   );
