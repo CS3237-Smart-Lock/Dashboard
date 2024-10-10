@@ -43,7 +43,7 @@ const SettingsPage = () => {
         onAddUser={Api.addUser}
       />
       <Button className="w-fit" onClick={() => setNewUserFormOpen(true)}>
-        Add new user
+        New user
       </Button>
       <div className="flex gap-4 flex-wrap">
         {users
