@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 const api = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
@@ -8,11 +9,12 @@ export const deleteUser = async (id: number) => {
     method: "DELETE",
   });
 
-  if (!response.ok) {
-    throw new Error(`Failed to delete user with ID ${id}`);
-  }
+  const data = await response.json();
 
-  return await response.json();
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+  return data;
 };
 
 export const addUser = async (name: string, desc: string, image: File) => {
@@ -26,11 +28,13 @@ export const addUser = async (name: string, desc: string, image: File) => {
     body: formData,
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error(`Failed to add user`);
+    throw new Error(data.error);
   }
 
-  return await response.json();
+  return data;
 };
 
 export const getAllUsers = async () => {
@@ -38,11 +42,36 @@ export const getAllUsers = async () => {
     method: "GET",
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error(`Failed to fetch users`);
+    throw new Error(data.error);
   }
 
-  return await response.json();
+  return data;
 };
 
-export const getAttempts = async (date: DateRange) => {};
+export const getAttempts = async (date: DateRange) => {
+  const fromDateString = date.from ? format(date.from, "yyyy-MM-dd") : null;
+  const toDateString = date.to ? format(date.to, "yyyy-MM-dd") : null;
+
+  const queryParams = new URLSearchParams();
+
+  if (fromDateString) {
+    queryParams.append("start_date", fromDateString);
+  }
+  if (toDateString) {
+    queryParams.append("end_date", toDateString);
+  }
+
+  const response = await fetch(`${api}/attempts?${queryParams.toString()}`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to get attempts.`);
+  }
+
+  const data = await response.json();
+  return data;
+};

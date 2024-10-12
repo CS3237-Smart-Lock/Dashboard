@@ -1,5 +1,7 @@
-import { TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 
 import {
   Card,
@@ -14,26 +16,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
+import { Spinner } from "@/components/ui/spinner";
 
-export const description = "An area chart with gradient fill";
-
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
+import { Attempt } from "@/models/Attempt";
 
 const chartConfig = {
-  desktop: {
-    label: "Attempts",
-    color: "hsl(var(--chart-1))",
+  total: {
+    label: "Total",
+    color: "hsl(var(--foreground))",
   },
-  mobile: {
+  success: {
     label: "Success",
     color: "hsl(var(--chart-2))",
   },
@@ -41,9 +33,51 @@ const chartConfig = {
 
 type VisitorChartProps = {
   date: DateRange | undefined;
+  visitorAttempts: Attempt[] | undefined;
 };
 
-export const VisitorChart = ({ date }: VisitorChartProps) => {
+const generateChartData = (visitorAttempts: Attempt[]) => {
+  const totalCounter: Record<string, number> = {};
+  const successCounter: Record<string, number> = {};
+
+  for (let i = 0; i < visitorAttempts.length; i++) {
+    const attempt = visitorAttempts[i];
+    const date = format(new Date(attempt.timestamp), "yyyy-MM-dd");
+    if (!totalCounter[date]) {
+      totalCounter[date] = 0;
+      successCounter[date] = 0;
+    }
+
+    totalCounter[date]++;
+    if (attempt.status === "success") {
+      successCounter[date]++;
+    }
+  }
+
+  const chartData = Object.keys(totalCounter).map((date) => ({
+    date: date,
+    total: totalCounter[date],
+    success: successCounter[date],
+  }));
+
+  return chartData;
+};
+
+const getChange = (
+  chartData: { date: string; total: number; success: number }[],
+) => {
+  if (chartData.length < 2) return 0;
+  const firstDay = chartData[0];
+  const lastDay = chartData[chartData.length - 1];
+
+  const percentage = (lastDay.total - firstDay.total) / firstDay.total;
+  return parseFloat(percentage.toFixed(2));
+};
+
+export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
+  const chartData = generateChartData(visitorAttempts || []);
+  const delta = getChange(chartData);
+
   return (
     <Card>
       <CardHeader>
@@ -55,74 +89,86 @@ export const VisitorChart = ({ date }: VisitorChartProps) => {
         )}
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <AreaChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-desktop)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-mobile)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              dataKey="mobile"
-              type="natural"
-              fill="url(#fillMobile)"
-              fillOpacity={0.4}
-              stroke="var(--color-mobile)"
-              stackId="a"
-            />
-            <Area
-              dataKey="desktop"
-              type="natural"
-              fill="url(#fillDesktop)"
-              fillOpacity={0.4}
-              stroke="var(--color-desktop)"
-              stackId="a"
-            />
-          </AreaChart>
-        </ChartContainer>
+        {visitorAttempts !== undefined ? (
+          <ChartContainer config={chartConfig}>
+            <AreaChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                left: 12,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+              <defs>
+                <linearGradient id="fillsuccess" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-success)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-success)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+                <linearGradient id="filltotal" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-total)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-total)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <Area
+                dataKey="success"
+                type="natural"
+                fill="url(#fillsuccess)"
+                fillOpacity={0.4}
+                stroke="var(--color-success)"
+                stackId="a"
+              />
+              <Area
+                dataKey="total"
+                type="natural"
+                fill="url(#filltotal)"
+                fillOpacity={0.4}
+                stroke="var(--color-total)"
+                stackId="a"
+              />
+            </AreaChart>
+          </ChartContainer>
+        ) : (
+          <Spinner />
+        )}
       </CardContent>
       <CardFooter>
         <div className="flex w-full items-start gap-2 text-sm">
           <div className="grid gap-2">
             <div className="flex items-center gap-2 font-medium leading-none">
-              Trending up by 5.2% <TrendingUp className="h-4 w-4" />
+              {delta >= 0 ? (
+                <p className="flex gap-1">
+                  Trending up by {delta}% <TrendingUp className="h-4 w-4" />
+                </p>
+              ) : (
+                <p className="flex gap-1">
+                  Trending down by {-delta}%{" "}
+                  <TrendingDown className="h-4 w-4" />
+                </p>
+              )}
             </div>
           </div>
         </div>
