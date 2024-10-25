@@ -1,3 +1,4 @@
+import { Attempt } from "@/models/Attempt";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
@@ -73,5 +74,34 @@ export const getAttempts = async (date: DateRange) => {
   }
 
   const data = await response.json();
+  data.map((attempt: any) => (attempt.recognized_user = attempt.name));
+  return data;
+};
+
+export const lockDoor = async () => {
+  const response = await fetch(`${api}/lock_door`, {
+    method: "GET",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
+};
+
+export const unlockDoor = async () => {
+  const response = await fetch(`${api}/unlock_door`, {
+    method: "GET",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error);
+  }
+
   return data;
 };

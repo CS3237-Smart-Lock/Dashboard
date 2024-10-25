@@ -174,7 +174,7 @@ const DashboardPage = () => {
             {attempts?.map((attempt) => (
               <>
                 <div>
-                  [{attempt.timestamp}] - Recognized User:
+                  [{attempt.timestamp}] - Recognized User:{" "}
                   {attempt.recognized_user}, Status {attempt.status}.
                 </div>
                 <Separator />

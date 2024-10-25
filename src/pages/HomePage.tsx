@@ -11,8 +11,8 @@ const HomePage = () => {
       </p>
 
       <div className="flex gap-10 mx-auto">
-        <Link to={"/camera"}>
-          <ShimmerButton>Camera</ShimmerButton>
+        <Link to={"/control"}>
+          <ShimmerButton>Controls</ShimmerButton>
         </Link>
         <Link to={"/dashboard"}>
           <ShimmerButton>Dashboard</ShimmerButton>

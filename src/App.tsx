@@ -5,8 +5,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 
 import HomePage from "@/pages/HomePage";
 import DashboardPage from "@/pages/DashboardPage";
-import CameraPage from "@/pages/CameraPage";
 import SettingsPage from "./pages/SettingsPage";
+import ControlPage from "./pages/ControlPage";
 
 const NavbarContent = () => {
   return (
@@ -15,8 +15,8 @@ const NavbarContent = () => {
         <Link to={"/"}>
           <NavbarButton text="Home" route="/" />
         </Link>
-        <Link to="/camera">
-          <NavbarButton text="Camera" route="/camera" />
+        <Link to="/control">
+          <NavbarButton text="Control" route="/control" />
         </Link>
         <Link to="/dashboard">
           <NavbarButton text="Dashboard" route="/dashboard" />
@@ -43,7 +43,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/camera" element={<CameraPage />} />
+          <Route path="/control" element={<ControlPage />} />
           <Route path="/settings" element={<SettingsPage />} />h
         </Routes>
       </Layout>
