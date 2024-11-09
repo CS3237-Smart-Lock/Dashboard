@@ -2,7 +2,7 @@ import { Attempt } from "@/models/Attempt";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
-const api = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
+const api = import.meta.env.VITE_API_URL || "http://127.0.0.1:8080";
 
 export const deleteUser = async (id: number) => {
   console.log("delete user", id);

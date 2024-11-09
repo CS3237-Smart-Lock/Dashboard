@@ -60,12 +60,12 @@ export const NewUserForm = (props: NewUserFormProps) => {
       return;
     }
 
-    const validImageTypes = ["image/png", "image/jpg", "image/jpeg"];
+    const validImageTypes = ["image/jpg", "image/jpeg"];
     if (!validImageTypes.includes(image.type)) {
       toast({
         variant: "destructive",
         title: "Invalid file type",
-        description: "Only PNG, JPG, or JPEG images are allowed.",
+        description: "Only JPG or JPEG images are allowed.",
       });
       return;
     }

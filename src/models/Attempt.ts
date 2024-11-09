@@ -4,4 +4,5 @@ export type Attempt = {
   recognized_user: string;
   status: "success" | "failure";
   details: string;
+  flagged?: boolean;
 };

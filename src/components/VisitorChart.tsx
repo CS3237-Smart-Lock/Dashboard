@@ -19,6 +19,8 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 import { Attempt } from "@/models/Attempt";
+import { setHeapSnapshotNearHeapLimit } from "v8";
+import { useState } from "react";
 
 const chartConfig = {
   total: {
@@ -60,7 +62,23 @@ const generateChartData = (visitorAttempts: Attempt[]) => {
     success: successCounter[date],
   }));
 
-  return chartData;
+  const totalValues = chartData.map((data) => data.total);
+  const mean =
+    totalValues.reduce((sum, value) => sum + value, 0) / totalValues.length;
+
+  const variance =
+    totalValues.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) /
+    totalValues.length;
+  const stdDev = Math.sqrt(variance);
+
+  const threshold = mean + 1 * stdDev;
+  const outliers = chartData.filter((data) => data.total > threshold);
+  console.log(outliers);
+
+  return {
+    chartData,
+    outliers,
+  };
 };
 
 const getChange = (
@@ -75,7 +93,7 @@ const getChange = (
 };
 
 export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
-  const chartData = generateChartData(visitorAttempts || []);
+  const { chartData, outliers } = generateChartData(visitorAttempts || []);
   const delta = getChange(chartData);
 
   return (
@@ -103,7 +121,7 @@ export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
               <XAxis
                 dataKey="date"
                 tickLine={false}
-                axisLine={false}
+                axisLine={true}
                 tickMargin={8}
               />
               <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
@@ -139,7 +157,6 @@ export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
                 fill="url(#fillsuccess)"
                 fillOpacity={0.4}
                 stroke="var(--color-success)"
-                stackId="a"
               />
               <Area
                 dataKey="total"
@@ -147,7 +164,6 @@ export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
                 fill="url(#filltotal)"
                 fillOpacity={0.4}
                 stroke="var(--color-total)"
-                stackId="a"
               />
             </AreaChart>
           </ChartContainer>
@@ -170,6 +186,14 @@ export const VisitorChart = ({ date, visitorAttempts }: VisitorChartProps) => {
                 </p>
               )}
             </div>
+            {outliers.length > 0 && (
+              <div>
+                Unusually high login attemps on the following days:
+                {outliers.map((data) => (
+                  <text> {data.date}</text>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CardFooter>
