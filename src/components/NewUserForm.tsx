@@ -11,11 +11,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Gesture } from "@/models/Gesture";
 
 type NewUserFormProps = {
   open: boolean;
   onOpenChange?: React.Dispatch<React.SetStateAction<boolean>>;
-  onAddUser?: (name: string, desc: string, image: File) => Promise<JSON>;
+  onAddUser?: (
+    name: string,
+    desc: string,
+    image: File,
+    gestures: Gesture[],
+  ) => Promise<JSON>;
 };
 
 export const NewUserForm = (props: NewUserFormProps) => {
@@ -23,6 +29,7 @@ export const NewUserForm = (props: NewUserFormProps) => {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
+  const [gestures, setGestures] = useState<Gesture[]>([]);
 
   const { toast } = useToast();
 
@@ -32,6 +39,7 @@ export const NewUserForm = (props: NewUserFormProps) => {
       setDescription("");
       setImage(null);
       setImageSrc(undefined);
+      setGestures([]);
     };
   }, [props.open]);
 
@@ -50,8 +58,12 @@ export const NewUserForm = (props: NewUserFormProps) => {
     }
   };
 
+  const addGesture = (gesture: Gesture) => {
+    setGestures([...gestures, gesture]);
+  };
+
   const handleSubmit = async () => {
-    if (!name || !description || !image) {
+    if (!name || !description || !image || !gestures) {
       toast({
         variant: "destructive",
         title: "Error adding user",
@@ -75,7 +87,7 @@ export const NewUserForm = (props: NewUserFormProps) => {
     }
 
     try {
-      await props.onAddUser(name, description, image);
+      await props.onAddUser(name, description, image, gestures);
       toast({
         variant: "default",
         description: "User successfully added",
@@ -126,6 +138,25 @@ export const NewUserForm = (props: NewUserFormProps) => {
               className="col-span-3"
             />
           </div>
+
+          <div className="flex flex-col gap-4 items-start">
+            <Label htmlFor="photo" className="text-right">
+              Gesture Password
+            </Label>
+            <Input
+              id="photo"
+              className="col-span-3"
+              value={gestures.map((s) => s.toUpperCase())}
+            />
+
+            <div className="flex gap-4 mx-auto">
+              <Button onClick={() => addGesture("left")}>LEFT</Button>
+              <Button onClick={() => addGesture("right")}>RIGHT</Button>
+              <Button onClick={() => addGesture("up")}>UP</Button>
+              <Button onClick={() => addGesture("down")}>DOWN</Button>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-4 items-start">
             <Label htmlFor="photo" className="text-right">
               Image

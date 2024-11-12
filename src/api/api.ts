@@ -1,4 +1,4 @@
-import { Attempt } from "@/models/Attempt";
+import { Gesture } from "@/models/Gesture";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 
@@ -18,11 +18,17 @@ export const deleteUser = async (id: number) => {
   return data;
 };
 
-export const addUser = async (name: string, desc: string, image: File) => {
+export const addUser = async (
+  name: string,
+  desc: string,
+  image: File,
+  gestures: Gesture[],
+) => {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("description", desc);
   formData.append("face_image", image);
+  formData.append("gestures", JSON.stringify(gestures));
 
   const response = await fetch(`${api}/user`, {
     method: "POST",
@@ -74,7 +80,6 @@ export const getAttempts = async (date: DateRange) => {
   }
 
   const data = await response.json();
-  data.map((attempt: any) => (attempt.recognized_user = attempt.name));
   return data;
 };
 

@@ -13,7 +13,7 @@ const ControlPage = () => {
 
   useEffect(() => {
     if (!wsRef.current) {
-      wsRef.current = new WebSocket("ws://192.168.205.75:12345/");
+      wsRef.current = new WebSocket("ws://192.168.0.75:12345/");
     }
     let isConnected = false;
 

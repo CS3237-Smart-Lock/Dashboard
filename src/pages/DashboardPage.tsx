@@ -19,6 +19,12 @@ import * as Api from "@/api/api";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { twMerge } from "tailwind-merge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const DashboardPage = () => {
   const [date, setDate] = useState<DateRange | undefined>({
@@ -28,6 +34,10 @@ const DashboardPage = () => {
 
   const [attempts, setAttempts] = useState<Attempt[] | undefined>();
   const [mostVisitedDay, setMostVisitedDay] = useState<string | undefined>();
+
+  const [attemptDialogId, setAttemptDialogId] = useState<number | null>(null);
+  const displayedAttempt = attempts?.filter((a) => a.id === attemptDialogId)[0];
+  console.log(displayedAttempt);
 
   useEffect(() => {
     if ((date && date.to && date.from) || (date && !date.to && !date.from)) {
@@ -67,6 +77,8 @@ const DashboardPage = () => {
       setAttempts(undefined);
     }
   }, [date]);
+
+  useEffect(() => {}, [attemptDialogId]);
 
   useEffect(() => {
     if (attempts !== undefined) {
@@ -202,6 +214,7 @@ const DashboardPage = () => {
         <div className="col-span-3 rounded-lg sm:h-[500px] h-fit">
           <VisitorChart date={date} visitorAttempts={attempts} />
         </div>
+
         <ScrollArea className="col-span-2 border rounded-lg h-[500px] p-4 w-full">
           <div className="flex gap-1 flex-col">
             {attempts?.map((attempt) => (
@@ -213,10 +226,11 @@ const DashboardPage = () => {
                       ? "bg-red-900 hover:bg-red-800"
                       : "hover:bg-neutral-700",
                   )}
+                  onClick={() => setAttemptDialogId(attempt.id)}
                 >
                   [{attempt.timestamp}] - Status: {attempt.status}.{" "}
                   {attempt.recognized_user && (
-                    <text>Recognized User:{attempt.recognized_user}.</text>
+                    <text>Recognized User: {attempt.recognized_user}.</text>
                   )}
                 </button>
                 <Separator />
@@ -225,6 +239,42 @@ const DashboardPage = () => {
           </div>
         </ScrollArea>
       </div>
+
+      {displayedAttempt && (
+        <Dialog
+          open={attemptDialogId !== null}
+          onOpenChange={() => setAttemptDialogId(null)}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Login Attempt</DialogTitle>
+            </DialogHeader>
+
+            <div>
+              <h4 className="text-lg font-bold">Status</h4>
+              {displayedAttempt.status}
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold">Time</h4>
+              {displayedAttempt.timestamp}
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold">User Recognized</h4>
+              {displayedAttempt.recognized_user || "Did not recognize"}
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h4 className="text-lg font-bold">Image</h4>
+              <img
+                src={`${import.meta.env.VITE_API_URL}/attempt/${attemptDialogId}/image`}
+                alt={`User image with attempt id ${attemptDialogId}`}
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

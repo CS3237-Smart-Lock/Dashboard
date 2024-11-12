@@ -6,7 +6,7 @@ const HomePage = () => {
     <div className="w-full flex justify-center align-middle flex-col gap-12">
       <p className="mx-auto">
         <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b bg-clip-text text-center text-8xl font-semibold leading-none text-transparent from-white to-slate-900/10 ">
-          Smart Lock (?)
+          Smart Control Lock
         </span>
       </p>
 
